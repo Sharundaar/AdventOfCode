@@ -19,3 +19,7 @@ g++ ./4-2/main.cpp -o ./4-2/app.exe -O2 -static-libgcc -static-libstdc++
 echo Compiling Day 5...
 g++ ./5-1/main.cpp -o ./5-1/app.exe -O2 -static-libgcc -static-libstdc++
 g++ ./5-2/main.cpp -o ./5-2/app.exe -O2 -static-libgcc -static-libstdc++
+
+echo Compiling Day 6...
+g++ ./6-1/main.cpp -o ./6-1/app.exe -O2 -static-libgcc -static-libstdc++
+rem g++ ./6-2/main.cpp -o ./6-2/app.exe -O2 -static-libgcc -static-libstdc++
