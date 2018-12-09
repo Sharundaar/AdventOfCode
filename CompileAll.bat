@@ -26,4 +26,8 @@ g++ ./6-2/main.cpp -o ./6-2/app.exe -O2 -static-libgcc -static-libstdc++
 
 echo Compiling Day 7...
 g++ ./7-1/main.cpp -o ./7-1/app.exe -O2 -static-libgcc -static-libstdc++
-REM g++ ./7-2/main.cpp -o ./7-2/app.exe -O2 -static-libgcc -static-libstdc++
+g++ ./7-2/main.cpp -o ./7-2/app.exe -O2 -static-libgcc -static-libstdc++
+
+echo Compiling Day 8...
+g++ ./8-1/main.cpp -o ./8-1/app.exe -O2 -static-libgcc -static-libstdc++
+g++ ./8-2/main.cpp -o ./8-2/app.exe -O2 -static-libgcc -static-libstdc++
