@@ -141,7 +141,7 @@ void output_area_to_image( const vector<entry>& entries, vector2 min, vector2 ma
     fwrite( &dh, sizeof(dib_header), 1, fp );
     
     /* write the pixels */
-    for(int j=0; j<size.h; ++j)
+    for(int j=size.h-1; j>=0; --j)
     {
         for(int i=0; i<size.w; ++i)
         {
