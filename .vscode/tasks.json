@@ -5,7 +5,7 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "cl.exe build active file",
+            "label": "Debug",
             "command": "cl.exe",
             "args": [
                 "/Zi",
@@ -21,6 +21,20 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "type": "shell",
+            "label": "Release",
+            "command": "cl.exe",
+            "args": [
+                "/EHsc",
+                "/Fe:",
+                "${fileDirname}\\app.exe",
+                "${file}"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
     ]
 }
