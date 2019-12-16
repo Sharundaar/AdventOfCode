@@ -4,8 +4,10 @@
 #include <vector>
 #include <unordered_map>
 #include <cassert>
+#include <functional>
 
 #include "../helpers/types.h"
+#include "../helpers/graph.hpp"
 
 using namespace std;
 
@@ -14,6 +16,8 @@ struct orbit
     char source[4];
     char orbiter[4];
 };
+
+
 
 int get_id( const vector<char*>& id_map, const char* obj_name )
 {
@@ -45,6 +49,7 @@ int main()
             orbits.emplace_back( o );
         }
 
+/*
         vector<char*> object_to_id_map;
         for( auto& o: orbits )
         {
@@ -66,23 +71,32 @@ int main()
             if( !found_orbiter )
                 object_to_id_map.push_back( o.orbiter );
         }
+*/
 
-        int object_count = object_to_id_map.size();
-        vector<int> orbit_matrix( object_count * object_count );
-        for( const auto& o : orbits )
-        {
-            int source_id = get_id( object_to_id_map, o.source );
-            int orbiter_id = get_id( object_to_id_map, o.orbiter );
+        graph<char*, 10000> g;
+        char* COM = "COM";
+        g.add_node( nullptr, COM );
+        g.iterate_all_nodes( [&]( graph_node<char*>& node ) -> void {
+            for( auto& o: orbits )
+            {
+                if( strcmp( o.source, node.data ) == 0 )
+                    g.add_node( &node, o.orbiter );
+            }
+        } );
 
-            orbit_matrix[ orbiter_id + source_id * object_count ] = 1;
-        }
+        int total_link_count = 0;
+        g.iterate_all_nodes( [&]( graph_node<char*>& node ) -> void {
+            graph_node<char*> *n = &node;
+            int link_count = 0;
+            while( n->parent )
+            {
+                n = n->parent;
+                link_count++;
+            }
+            total_link_count += link_count;
+        } );
 
-        int orbit_count = 0;
-        for( int orbiter=0; orbiter<object_count; ++orbiter )
-        {
-            
-        }
-
+        cout << total_link_count << endl;
     }
 
     return 0;
