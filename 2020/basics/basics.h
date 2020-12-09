@@ -22,6 +22,18 @@ void I_strcpy( char (&dest) [Size], const char* src )
 	return I_strcpy( dest, Size, src );
 }
 
+template <class T>
+const T I_min( const T a, const T b )
+{
+  return !(b<a)?a:b;
+}
+
+template <class T>
+const T I_max( const T a, const T b )
+{
+  return (b<a)?a:b;
+}
+
 bool Com_Assert( bool condition, const char* message, const char* file, u32 line );
 void Com_Printf( const char* fmt, ... );
 void Com_Println( const char* fmt, ... );
