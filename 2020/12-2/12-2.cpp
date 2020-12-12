@@ -61,7 +61,7 @@ int main( int argc, char* argv[] )
             
             Entry entry;
             entry.dir = line[0];
-            try_parse_to_int( line.c_str()+1, entry.num );
+            entry.num = parse_to_int( line.c_str()+1 );
             entries.push_back( entry );
         }
 

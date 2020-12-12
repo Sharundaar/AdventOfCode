@@ -82,3 +82,32 @@ bool try_parse_to_uint( const std::string& str, uint& out )
 {
     return try_parse_to_uint( str.c_str(), out );
 }
+
+int parse_to_int( const char* str )
+{
+    int val = 0;
+    try_parse_to_int( str, val );
+    return val;
+}
+
+int parse_to_int( const std::string& str )
+{
+    int val = 0;
+    try_parse_to_int( str, val );
+    return val;
+}
+
+uint parse_to_uint( const char* str )
+{
+    uint val = 0;
+    try_parse_to_uint( str, val );
+    return val;
+}
+
+uint parse_to_uint( const std::string& str )
+{
+    uint val = 0;
+    try_parse_to_uint( str, val );
+    return val;
+}
+
