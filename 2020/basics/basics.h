@@ -34,6 +34,12 @@ const T I_max( const T a, const T b )
   return (b<a)?a:b;
 }
 
+template <typename T>
+const T I_abs( const T a )
+{
+	return abs( a );
+}
+
 bool Com_Assert( bool condition, const char* message, const char* file, u32 line );
 void Com_Printf( const char* fmt, ... );
 void Com_Println( const char* fmt, ... );
