@@ -4,7 +4,7 @@ import "core:strings"
 import "core:slice"
 import "core:strconv"
 
-input : string : string(#load( "input.txt" ))
+input :: string(#load( "input.txt" ))
 
 main :: proc() {
     measurements := slice.mapper(strings.split(input, "\n"), strconv.atoi)
