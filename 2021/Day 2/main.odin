@@ -7,35 +7,36 @@ import "core:strconv"
 input :: string(#load( "input.txt" ))
 
 part1 :: proc() {
-    lines := strings.split(input, "\n")
-    depth := 0
-    hor := 0
+    using strings, strconv
+
+    lines := split(input, "\n")
+    depth, hor : int
 
     for line in lines {
-        splt := strings.split( line, " " )
+        splt := split( line, " " )
         dir := splt[0]
         switch dir {
-            case "forward": hor += strconv.atoi(splt[1])
-            case "up": depth -= strconv.atoi(splt[1])
-            case "down": depth += strconv.atoi(splt[1])
+            case "forward": hor += atoi(splt[1])
+            case "up": depth -= atoi(splt[1])
+            case "down": depth += atoi(splt[1])
         }
     }
     fmt.println( depth * hor )
 }
 
 part2 :: proc() {
-    lines := strings.split(input, "\n")
-    depth := 0
-    hor := 0
-    aim := 0
+    using strings, strconv
+
+    lines := split(input, "\n")
+    depth, hor, aim: int
 
     for line in &lines {
-        splt := strings.split( line, " " )
+        splt := split( line, " " )
         dir := splt[0]
         switch dir {
-            case "forward": hor += strconv.atoi(splt[1]) ; depth += aim * strconv.atoi(splt[1])
-            case "up": aim -= strconv.atoi(splt[1])
-            case "down": aim += strconv.atoi(splt[1])
+            case "forward": hor += atoi(splt[1]) ; depth += aim * atoi(splt[1])
+            case "up": aim -= atoi(splt[1])
+            case "down": aim += atoi(splt[1])
         }
     }
     fmt.println( depth * hor )
