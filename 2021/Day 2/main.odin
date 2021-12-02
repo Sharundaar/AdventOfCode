@@ -8,8 +8,8 @@ input :: string(#load( "input.txt" ))
 
 part1 :: proc() {
     lines := strings.split(input, "\n")
-    depth : int = 0
-    hor : int = 0
+    depth := 0
+    hor := 0
 
     for line in lines {
         splt := strings.split( line, " " )
@@ -25,9 +25,9 @@ part1 :: proc() {
 
 part2 :: proc() {
     lines := strings.split(input, "\n")
-    depth : int = 0
-    hor : int = 0
-    aim : int = 0
+    depth := 0
+    hor := 0
+    aim := 0
 
     for line in &lines {
         splt := strings.split( line, " " )
