@@ -51,21 +51,19 @@ compute_score :: proc( using board: ^Board ) -> int {
 }
 
 parse_boards :: proc( lines: []string ) -> (boards: [dynamic]Board) {
-    board_start, board_end := 2, 2 + 5
-    for board_end < len( lines ) {
+    line_idx := 1
+    for line_idx := 1; line_idx < len(lines); line_idx += 1 {
+        if len( lines[line_idx] ) <= 1 do continue
         board := Board{}
-        for i := board_start; i < board_end; i += 1 {
-            line : string = lines[i]
-            for k := 0; k < 5; k += 1 {
-                idx_start := k * 3
-                idx_end := idx_start + 2
-                if line[idx_start] == ' ' do idx_start += 1
-                board.grid[i-board_start][k] = u8( strconv.atoi( line[idx_start:min(idx_end, len(line)-1)] ) )
+        for i := 0 ; i<5; i += 1 {
+            line := lines[line_idx + i]
+            nums := strings.fields( line ) ; defer delete( nums )
+            for num, k in &nums {
+                board.grid[i][k] = atou8( num )
             }
         }
+        line_idx += 5
         append( &boards, board )
-        board_start += 6
-        board_end = board_start + 5
     }
 
     return
@@ -77,7 +75,7 @@ atou8 :: proc( s: string ) -> u8 {
 
 part1 :: proc() {
     using strconv
-    lines := strings.split(input, "\n")
+    lines := strings.split(input, "\n") ; defer delete( lines )
 
     numbers := slice.mapper( strings.split( lines[0], ","), atou8 )
     boards: [dynamic]Board = parse_boards( lines )
