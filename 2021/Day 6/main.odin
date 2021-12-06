@@ -7,35 +7,30 @@ import "core:math"
 
 input :: string(#load( "input.txt" ))
 
-Bucket :: struct {
-    count: int,
-    new: int,
-}
-
+Bucket :: int
 part1 :: proc() {
     fmt.println("==== Part 1 Begin ====")
     numbers := slice.mapper( strings.split( input, "," ), strconv.atoi ) ; defer delete( numbers )
     buckets : [9]Bucket
     for num in numbers {
-        buckets[num].count += 1
+        buckets[num] += 1
     }
 
     for day := 0; day < 80; day += 1 {
-        for i:=0; i<len(buckets); i += 1 {
-            if i == 0 do buckets[8].new += buckets[0].count
-            new_bucket_idx := i - 1
-            if new_bucket_idx < 0 do new_bucket_idx = 6
-            buckets[new_bucket_idx].new += buckets[i].count
-            buckets[i].count = 0
-        }
-        for i:=0; i<len(buckets); i += 1 {
-            buckets[i].count = buckets[i].new
-            buckets[i].new = 0
-        }
+        new := buckets[0]
+        buckets[0] = buckets[1]
+        buckets[1] = buckets[2]
+        buckets[2] = buckets[3]
+        buckets[3] = buckets[4]
+        buckets[4] = buckets[5]
+        buckets[5] = buckets[6]
+        buckets[6] = new + buckets[7]
+        buckets[7] = buckets[8]
+        buckets[8] = new
     }
     count : int
     for b in buckets {
-        count += b.count
+        count += b
     }
     fmt.println( count )
 
@@ -47,28 +42,26 @@ part2 :: proc() {
     numbers := slice.mapper( strings.split( input, "," ), strconv.atoi ) ; defer delete( numbers )
     buckets : [9]Bucket
     for num in numbers {
-        buckets[num].count += 1
+        buckets[num] += 1
     }
 
     for day := 0; day < 256; day += 1 {
-        for i:=0; i<len(buckets); i += 1 {
-            if i == 0 do buckets[8].new += buckets[0].count
-            new_bucket_idx := i - 1
-            if new_bucket_idx < 0 do new_bucket_idx = 6
-            buckets[new_bucket_idx].new += buckets[i].count
-            buckets[i].count = 0
-        }
-        for i:=0; i<len(buckets); i += 1 {
-            buckets[i].count = buckets[i].new
-            buckets[i].new = 0
-        }
+        new := buckets[0]
+        buckets[0] = buckets[1]
+        buckets[1] = buckets[2]
+        buckets[2] = buckets[3]
+        buckets[3] = buckets[4]
+        buckets[4] = buckets[5]
+        buckets[5] = buckets[6]
+        buckets[6] = new + buckets[7]
+        buckets[7] = buckets[8]
+        buckets[8] = new
     }
     count : int
     for b in buckets {
-        count += b.count
+        count += b
     }
     fmt.println( count )
-
 
     fmt.println("==== Part 2 End ====")
 }
