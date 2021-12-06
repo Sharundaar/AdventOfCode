@@ -6,6 +6,7 @@
         {
             "label": "build",
             "type": "shell",
+            // "command": "C:\\Home\\Odin\\odin run \"${file}\" -opt:2 -no-bounds-check -disable-assert",
             "command": "C:\\Home\\Odin\\odin run \"${file}\" -debug -opt:0",
             "group": {
                 "isDefault": true,
