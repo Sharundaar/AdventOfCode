@@ -5,6 +5,7 @@ import "core:slice"
 import "core:strconv"
 import "core:math"
 import "core:os"
+import "core:intrinsics"
 
 input :: string(#load( "input.txt" ))
 
@@ -55,11 +56,22 @@ part1 :: proc() {
     fmt.println("==== Part 1 End ====")
 }
 
-find :: proc( src: []u8, v: u8 ) -> bool {
-    for s in src {
-        if s == v do return true
-    }
-    return false
+contains_slice :: proc( container, containee: $T/[]$E ) -> bool where intrinsics.type_is_comparable(E) {
+	n := len( containee )
+	if n > len( container ) {
+		return false
+	}
+	for i in 0..<n {
+		if !slice.contains( container, containee[i] ) {
+			return false
+		}
+	}
+	return true
+}
+
+find :: proc{
+    slice.contains,
+    contains_slice,
 }
 
 part2 :: proc() {
@@ -100,20 +112,8 @@ part2 :: proc() {
         // deduce 6, 9 and 0 thanks to 1 and 4
         for i in &entry.input {
             if len( i ) == 6 {
-                found_one : int
-                found_four : int
-                for one_spot in &patterns[1] {
-                    for spot in &i {
-                        if spot == one_spot do found_one += 1
-                    }
-                }
-                for four_spot in &patterns[4] {
-                    for spot in &i {
-                        if spot == four_spot do found_four += 1
-                    }
-                }
-                if found_one == len(patterns[1]) {
-                    if found_four == len( patterns[4] ) {
+                if find( i[:], patterns[1][:] ) {
+                    if find( i[:], patterns[4][:] ) {
                         patterns[9] = i
                     } else {
                         patterns[0] = i
