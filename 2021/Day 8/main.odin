@@ -9,15 +9,11 @@ import "core:intrinsics"
 
 input :: string(#load( "input.txt" ))
 
-// lines := strings.split(input, "\n")
-// numbers := slice.mapper( strings.split( input, "," ), strconv.atoi ) ; defer delete( numbers )
-
 Entry :: struct {
     input: [10][dynamic]u8,
     output: [4][dynamic]u8,
 }
 
-Bucket :: int
 part1 :: proc() {
     fmt.println("==== Part 1 Begin ====")
     lines := strings.split(input, "\n")
@@ -62,7 +58,7 @@ contains_slice :: proc( container, containee: $T/[]$E ) -> bool where intrinsics
 		return false
 	}
 	for i in 0..<n {
-		if !slice.contains( container, containee[i] ) {
+		if !find( container, containee[i] ) {
 			return false
 		}
 	}
