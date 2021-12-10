@@ -96,10 +96,10 @@ part2 :: proc() {
 
         if len( stack ) > 0 {
             line_points: int
-            for len(stack) > 0 {
-                last := stack[len(stack)-1]
+            for {
+                last, ok := pop_safe( &stack )
+                if !ok do break
                 last_idx := find_index( last, ChunkTokenCharsOpen )
-                pop( &stack )
                 line_points = line_points * 5 + ChunkTokenIncompletePoints[last_idx]
             }
             append( &scores, line_points )
@@ -114,11 +114,6 @@ part2 :: proc() {
 }
 
 main :: proc() {
-
-    arr: [dynamic]int
-    assert( cap(arr) == 0 )
-    delete( arr )
-
     part1()
     part2()
 }
