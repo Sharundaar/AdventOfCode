@@ -10,11 +10,11 @@ import "core:unicode/utf8"
 
 input :: string(#load( "input.txt" ))
 
-find_index :: proc( c: u8, s: []u8 ) -> int {
+find_index :: proc( c: u8, s: []u8 ) -> (int, bool) {
     for p, i in s {
-        if p == c do return i
+        if p == c do return i, true
     }
-    return -1
+    return 0, false
 }
 
 TOKEN_TYPE_COUNT :: 4
@@ -35,20 +35,16 @@ part1 :: proc() {
             assert( i == 1 )
             c := rc[0]
             
-            idx := find_index( c, ChunkTokenCharsOpen )
-            if idx != -1 {
+            if idx, ok := find_index( c, ChunkTokenCharsOpen ); ok {
                 append( &stack, c )
                 continue
             }
-            idx = find_index( c, ChunkTokenCharsClose )
-            if idx != -1 {
-                last := stack[len(stack)-1]
-                last_idx := find_index( last, ChunkTokenCharsOpen )
+            if idx, ok := find_index( c, ChunkTokenCharsClose ); ok {
+                last := pop( &stack )
+                last_idx, _ := find_index( last, ChunkTokenCharsOpen )
                 if last_idx != idx {
                     corrupted_token_count[idx] += 1
                     break
-                } else {
-                    pop( &stack )
                 }
                 continue
             }
@@ -76,19 +72,16 @@ part2 :: proc() {
             assert( i == 1 )
             c := rc[0]
             
-            idx := find_index( c, ChunkTokenCharsOpen )
-            if idx != -1 {
+            if idx, ok := find_index( c, ChunkTokenCharsOpen ); ok {
                 append( &stack, c )
                 continue
             }
-            idx = find_index( c, ChunkTokenCharsClose )
-            if idx != -1 {
-                last := stack[len(stack)-1]
-                last_idx := find_index( last, ChunkTokenCharsOpen )
+            
+            if idx, ok := find_index( c, ChunkTokenCharsClose ); ok {
+                last := pop( &stack )
+                last_idx, _ := find_index( last, ChunkTokenCharsOpen )
                 if last_idx != idx {
                     continue line_loop // corrupted line, skip
-                } else {
-                    pop( &stack )
                 }
                 continue
             }
@@ -99,7 +92,7 @@ part2 :: proc() {
             for {
                 last, ok := pop_safe( &stack )
                 if !ok do break
-                last_idx := find_index( last, ChunkTokenCharsOpen )
+                last_idx, _ := find_index( last, ChunkTokenCharsOpen )
                 line_points = line_points * 5 + ChunkTokenIncompletePoints[last_idx]
             }
             append( &scores, line_points )
