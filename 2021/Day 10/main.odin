@@ -17,27 +17,19 @@ find_index :: proc( c: u8, s: []u8 ) -> int {
     return -1
 }
 
-ChunkToken :: enum {
-    Parenthesis,
-    SquareBracket,
-    Bracket,
-    GTLT,
-    Count,
-}
-
+TOKEN_TYPE_COUNT :: 4
 ChunkTokenCharsOpen :: []u8{ '(', '[', '{', '<' }
 ChunkTokenCharsClose :: []u8{ ')', ']', '}', '>' }
-ChunkTokenPoints := []int{ 3, 57, 1197, 25137 }
+ChunkTokenCorruptedPoints := []int{ 3, 57, 1197, 25137 }
 ChunkTokenIncompletePoints := []int{ 1, 2, 3, 4 }
+
 part1 :: proc() {
     fmt.println("==== Part 1 Begin ====")
     lines := strings.split(input, "\n")
 
-    chunk_token_counter : [ChunkToken.Count]int
-    corrupted_count : int
-    corrupted_token_count : [ChunkToken.Count]int
-    stack: [dynamic]u8
+    corrupted_token_count : [TOKEN_TYPE_COUNT]int
     for line in &lines {
+        stack: [dynamic]u8 ; defer if cap( stack ) > 0 do delete( stack )
         for r in line {
             rc, i := utf8.encode_rune( r )
             assert( i == 1 )
@@ -53,7 +45,6 @@ part1 :: proc() {
                 last := stack[len(stack)-1]
                 last_idx := find_index( last, ChunkTokenCharsOpen )
                 if last_idx != idx {
-                    corrupted_count += 1
                     corrupted_token_count[idx] += 1
                     break
                 } else {
@@ -61,17 +52,12 @@ part1 :: proc() {
                 }
                 continue
             }
-            
-            if r == '\n' || r == '\r' do continue
-            fmt.println( "wrong char", c )
-            assert( false )
         }
     }
-    fmt.println( corrupted_count )
     fmt.println( corrupted_token_count )
     points : int
     for c, i in corrupted_token_count {
-        points += c * ChunkTokenPoints[i]
+        points += c * ChunkTokenCorruptedPoints[i]
     }
     fmt.println( points )
 
@@ -84,7 +70,7 @@ part2 :: proc() {
 
     scores: [dynamic]int
     line_loop: for line in &lines {
-        stack: [dynamic]u8 ; defer delete( stack )
+        stack: [dynamic]u8 ; defer if cap( stack ) > 0 do delete( stack )
         for r in line {
             rc, i := utf8.encode_rune( r )
             assert( i == 1 )
@@ -106,10 +92,6 @@ part2 :: proc() {
                 }
                 continue
             }
-            
-            if r == '\n' || r == '\r' do continue
-            fmt.println( "wrong char", c )
-            assert( false )
         }
 
         if len( stack ) > 0 {
@@ -132,6 +114,11 @@ part2 :: proc() {
 }
 
 main :: proc() {
+
+    arr: [dynamic]int
+    assert( cap(arr) == 0 )
+    delete( arr )
+
     part1()
     part2()
 }
