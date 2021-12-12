@@ -33,12 +33,10 @@ part1 :: proc() {
             flash_happened := false
             for y in 0..<10 do for x in 0..<10 {
                     if energies[10*y+x] > 9 && !flashed[10*y+x] {
-                        for ny in y-1..y+1 {
-                            for nx in x-1..x+1 {
+                        for ny in max(0, y-1)..min(y+1, 9) {
+                            for nx in max(0, x-1)..min(x+1, 9) {
                                 if nx == x && ny == y do continue
-                                if nx >= 0 && nx < 10 && ny >= 0 && ny < 10 {
-                                    energies[10*ny+nx] += 1
-                                }
+                                energies[10*ny+nx] += 1
                             }
                         }
                         flashed[10*y+x] = true
@@ -84,12 +82,10 @@ part2 :: proc() {
             flash_happened := false
             for y in 0..<10 do for x in 0..<10 {
                 if energies[10*y+x] > 9 && !flashed[10*y+x] {
-                    for ny in y-1..y+1 {
-                        for nx in x-1..x+1 {
+                    for ny in max(0, y-1)..min(y+1, 9) {
+                        for nx in max(0, x-1)..min(x+1, 9) {
                             if nx == x && ny == y do continue
-                            if nx >= 0 && nx < 10 && ny >= 0 && ny < 10 {
-                                energies[10*ny+nx] += 1
-                            }
+                            energies[10*ny+nx] += 1
                         }
                     }
                     flashed[10*y+x] = true
