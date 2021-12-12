@@ -9,33 +9,6 @@ import "core:intrinsics"
 
 input :: string(#load( "input.txt" ))
 
-contains_slice :: proc( container, containee: $T/[]$E ) -> bool where intrinsics.type_is_comparable(E) {
-	n := len( containee )
-	if n > len( container ) {
-		return false
-	}
-	for i in 0..<n {
-		if !find( container, containee[i] ) {
-			return false
-		}
-	}
-	return true
-}
-
-find :: proc{
-    slice.contains,
-    contains_slice,
-}
-
-count_node :: proc( container: []int, idx: int ) -> int {
-    count: int
-    for k in container {
-        if k == idx do count += 1
-    }
-
-    return count
-}
-
 Node :: struct {
     idx : int,
     name: string,
@@ -57,11 +30,36 @@ has_connection :: proc( m: []int, n_count, a, b: int ) -> bool {
     return m[a*n_count + b] > 0
 }
 
-search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic]int, current_node: int ) -> Maybe([dynamic][dynamic]int) {
+add_node :: proc( nodes: ^[dynamic]Node, name: string ) -> int {
+    nodes := nodes
+    node := Node{}
+    node.name = strings.clone( name )
+    if node.name[0] >= 'A' && node.name[0] <= 'Z' do node.is_big = true
+    n := len( nodes )
+    node.idx = n
+    append( nodes, node )
+    return n
+}
+
+search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic]int, current_node: int, visit_twice_version : bool = false, has_visited_twice : bool = false ) -> Maybe([dynamic][dynamic]int) {
     node := &nodes[current_node]
-    if !node.is_big && find( current_path[:], current_node ) {
-        delete( current_path )
-        return nil
+    has_visited_twice := has_visited_twice
+    if visit_twice_version {
+        if has_visited_twice || ( node.name == "start" || node.name == "end" ) {
+            if !node.is_big && slice.contains( current_path[:], current_node ) {
+                delete( current_path )
+                return nil
+            }
+        } else {
+            if !node.is_big && slice.contains( current_path[:], current_node ) {
+                has_visited_twice = true
+            }
+        }
+    } else {
+        if !node.is_big && slice.contains( current_path[:], current_node ) {
+            delete( current_path )
+            return nil
+        }
     }
     current_path := current_path
     append( &current_path, current_node )
@@ -75,11 +73,9 @@ search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic
         if i == current_node do continue
         connected := (connectivity[current_node*len(nodes) + i] > 0)
         if connected {
-            found_path := search_paths( nodes, connectivity, slice.to_dynamic( current_path[:] ), i )
+            found_path := search_paths( nodes, connectivity, slice.to_dynamic( current_path[:] ), i, visit_twice_version, has_visited_twice )
             if found_path != nil {
-                for path in found_path.? {
-                    append( &path_list, path )
-                }
+                append( &path_list, ..found_path.?[:] )
             }
         }
     }
@@ -88,29 +84,14 @@ search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic
 
 part1 :: proc() {
     fmt.println("==== Part 1 Begin ====")
-    lines := strings.split(input, "\r\n")
+    lines := strings.split(input, "\r\n") ; defer delete( lines )
     nodes: [dynamic]Node
     edges: [dynamic]Edge
     for line in lines {
         splt := strings.split( line, "-" ) ; defer delete( splt )
-        n1 := find_node( nodes[:], splt[0] )
-        n2 := find_node( nodes[:], splt[1] )
-        if n1 == -1 {
-            node := Node{}
-            node.name = strings.clone( splt[0] )
-            if node.name[0] >= 'A' && node.name[0] <= 'Z' do node.is_big = true
-            n1 = len( nodes )
-            node.idx = n1
-            append( &nodes, node )
-        }
-        if n2 == -1 {
-            node := Node{}
-            node.name = strings.clone( splt[1] )
-            if node.name[0] >= 'A' && node.name[0] <= 'Z' do node.is_big = true
-            n2 = len( nodes )
-            node.idx = n2
-            append( &nodes, node )
-        }
+        n1, n2 := find_node( nodes[:], splt[0] ), find_node( nodes[:], splt[1] )
+        if n1 == -1 do n1 = add_node( &nodes, splt[0] )
+        if n2 == -1 do n2 = add_node( &nodes, splt[1] )
 
         append( &edges, Edge{ n1, n2 } )
     }
@@ -141,67 +122,17 @@ part1 :: proc() {
     fmt.println("==== Part 1 End ====")
 }
 
-search_paths_2 :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic]int, current_node: int, has_visited_twice: bool ) -> Maybe([dynamic][dynamic]int) {
-    node := &nodes[current_node]
-    has_visited_twice := has_visited_twice
-    if has_visited_twice || ( node.name == "start" || node.name == "end" ) {
-        if !node.is_big && find( current_path[:], current_node ) {
-            delete( current_path )
-            return nil
-        }
-    } else {
-        if !node.is_big && find( current_path[:], current_node ) {
-            has_visited_twice = true
-        }
-    }
-    current_path := current_path
-    append( &current_path, current_node )
-    path_list : [dynamic][dynamic]int
-    if node.name == "end" {
-        append( &path_list, current_path )
-        return path_list
-    }
-
-    for i in 0..<len(nodes) {
-        if i == current_node do continue
-        connected := (connectivity[current_node*len(nodes) + i] > 0)
-        if connected {
-            found_path := search_paths_2( nodes, connectivity, slice.to_dynamic( current_path[:] ), i, has_visited_twice )
-            if found_path != nil {
-                for path in found_path.? {
-                    append( &path_list, path )
-                }
-            }
-        }
-    }
-    return path_list
-}
-
 part2 :: proc() {
     fmt.println("==== Part 2 Begin ====")
-    lines := strings.split(input, "\r\n")
+    lines := strings.split(input, "\r\n") ; defer delete( lines )
     nodes: [dynamic]Node
     edges: [dynamic]Edge
     for line in lines {
         splt := strings.split( line, "-" ) ; defer delete( splt )
         n1 := find_node( nodes[:], splt[0] )
         n2 := find_node( nodes[:], splt[1] )
-        if n1 == -1 {
-            node := Node{}
-            node.name = strings.clone( splt[0] )
-            if node.name[0] >= 'A' && node.name[0] <= 'Z' do node.is_big = true
-            n1 = len( nodes )
-            node.idx = n1
-            append( &nodes, node )
-        }
-        if n2 == -1 {
-            node := Node{}
-            node.name = strings.clone( splt[1] )
-            if node.name[0] >= 'A' && node.name[0] <= 'Z' do node.is_big = true
-            n2 = len( nodes )
-            node.idx = n2
-            append( &nodes, node )
-        }
+        if n1 == -1 do n1 = add_node( &nodes, splt[0] )
+        if n2 == -1 do n2 = add_node( &nodes, splt[1] )
 
         append( &edges, Edge{ n1, n2 } )
     }
@@ -225,7 +156,7 @@ part2 :: proc() {
     }
 
     path : [dynamic]int
-    paths := search_paths_2( nodes[:], connectivity_matrix, path, start_node, false )
+    paths := search_paths( nodes[:], connectivity_matrix, path, start_node, true, false )
     fmt.println( len( paths.? ) )
 
     fmt.println("==== Part 2 End ====")
