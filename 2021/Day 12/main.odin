@@ -6,6 +6,7 @@ import "core:strconv"
 import "core:math"
 import "core:os"
 import "core:intrinsics"
+import "core:mem"
 
 input :: string(#load( "input.txt" ))
 
@@ -41,7 +42,7 @@ add_node :: proc( nodes: ^[dynamic]Node, name: string ) -> int {
     return n
 }
 
-search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic]int, current_node: int, visit_twice_version : bool = false, has_visited_twice : bool = false ) -> Maybe([dynamic][dynamic]int) {
+search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic]int, current_node: int, visit_twice_version := false, has_visited_twice := false ) -> Maybe([dynamic][dynamic]int) {
     node := &nodes[current_node]
     has_visited_twice := has_visited_twice
     if visit_twice_version {
@@ -68,6 +69,7 @@ search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic
         append( &path_list, current_path )
         return path_list
     }
+    defer delete( current_path )
 
     for i in 0..<len(nodes) {
         if i == current_node do continue
@@ -76,6 +78,7 @@ search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic
             found_path := search_paths( nodes, connectivity, slice.to_dynamic( current_path[:] ), i, visit_twice_version, has_visited_twice )
             if found_path != nil {
                 append( &path_list, ..found_path.?[:] )
+                delete( found_path.? )
             }
         }
     }
@@ -85,8 +88,13 @@ search_paths :: proc( nodes: []Node, connectivity: []int, current_path: [dynamic
 part1 :: proc() {
     fmt.println("==== Part 1 Begin ====")
     lines := strings.split(input, "\r\n") ; defer delete( lines )
-    nodes: [dynamic]Node
-    edges: [dynamic]Edge
+    nodes: [dynamic]Node ; defer {
+        for n in &nodes {
+            delete( n.name )
+        }
+        delete( nodes )
+    }
+    edges: [dynamic]Edge ; defer delete( edges )
     for line in lines {
         splt := strings.split( line, "-" ) ; defer delete( splt )
         n1, n2 := find_node( nodes[:], splt[0] ), find_node( nodes[:], splt[1] )
@@ -104,7 +112,7 @@ part1 :: proc() {
     fmt.printf( "start idx: %d\n", start_node )
     fmt.printf( "end idx: %d\n", end_node )
 
-    connectivity_matrix := make( []int, len(nodes)*len(nodes) )
+    connectivity_matrix := make( []int, len(nodes)*len(nodes) ) ; defer delete( connectivity_matrix )
     add_connection :: proc( m: []int, n_count, a, b: int ) {
         m[a*n_count + b] = 1
         m[b*n_count + a] = 1
@@ -115,9 +123,15 @@ part1 :: proc() {
     }
 
     path : [dynamic]int
-    paths := search_paths( nodes[:], connectivity_matrix, path, start_node )
+    paths_maybe := search_paths( nodes[:], connectivity_matrix, path, start_node )
+    paths := paths_maybe.?
 
-    fmt.println( len( paths.? ) )
+    fmt.println( len( paths ) )
+
+    for path in paths {
+        delete(path)
+    }
+    delete(paths)
 
     fmt.println("==== Part 1 End ====")
 }
@@ -125,8 +139,13 @@ part1 :: proc() {
 part2 :: proc() {
     fmt.println("==== Part 2 Begin ====")
     lines := strings.split(input, "\r\n") ; defer delete( lines )
-    nodes: [dynamic]Node
-    edges: [dynamic]Edge
+    nodes: [dynamic]Node ; defer {
+        for n in &nodes {
+            delete( n.name )
+        }
+        delete( nodes )
+    }
+    edges: [dynamic]Edge ; defer delete( edges )
     for line in lines {
         splt := strings.split( line, "-" ) ; defer delete( splt )
         n1 := find_node( nodes[:], splt[0] )
@@ -145,7 +164,7 @@ part2 :: proc() {
     fmt.printf( "start idx: %d\n", start_node )
     fmt.printf( "end idx: %d\n", end_node )
 
-    connectivity_matrix := make( []int, len(nodes)*len(nodes) )
+    connectivity_matrix := make( []int, len(nodes)*len(nodes) ) ; defer delete( connectivity_matrix )
     add_connection :: proc( m: []int, n_count, a, b: int ) {
         m[a*n_count + b] = 1
         m[b*n_count + a] = 1
@@ -156,13 +175,42 @@ part2 :: proc() {
     }
 
     path : [dynamic]int
-    paths := search_paths( nodes[:], connectivity_matrix, path, start_node, true, false )
-    fmt.println( len( paths.? ) )
+    paths_maybe := search_paths( nodes[:], connectivity_matrix, path, start_node, true, false )
+    paths := paths_maybe.?
+
+    fmt.println( len( paths ) )
+
+    for path in paths {
+        delete(path)
+    }
+    delete(paths)
 
     fmt.println("==== Part 2 End ====")
 }
 
+TRACKING_MEM :: false
+
 main :: proc() {
+
+when TRACKING_MEM {
+    track : mem.Tracking_Allocator
+	mem.tracking_allocator_init(&track, context.allocator)
+	defer mem.tracking_allocator_destroy(&track)
+    context.allocator = mem.tracking_allocator(&track)
+}
+
     part1()
     part2()
+
+when TRACKING_MEM {
+	if len(track.allocation_map) > 0 {
+		fmt.println()
+        total : int
+		for _, v in track.allocation_map {
+            total += v.size
+			fmt.printf("%v - leaked %v bytes\n", v.location, v.size)
+		}
+        fmt.println( "leaked", total, "bytes" )
+	}
+}
 }
