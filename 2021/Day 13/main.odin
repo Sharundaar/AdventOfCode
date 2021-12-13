@@ -35,17 +35,21 @@ Fold :: struct {
     coord: int,
 }
 
+string_starts_with :: proc( s: string, starts_with: string ) -> bool {
+    l_starts_with := len( starts_with )
+    return len( s ) >= l_starts_with && s[0:l_starts_with] == starts_with
+}
+
 part1_and_2 :: proc() {
-    fmt.println("==== Part 1 Begin ====")
+    fmt.println("==== Part 1-2 Begin ====")
     lines := strings.split(input, "\r\n") ; defer delete( lines )
 
     dots : [dynamic]Dot ; defer delete( dots )
     folds : [dynamic]Fold ; defer delete( folds )
-    fold_along := "fold along"
     for line in &lines {
         if line == "" do continue
-        if len( line ) >= len( fold_along ) && line[0:len(fold_along)] == fold_along {
-            splt := strings.split( line[len(fold_along)+1:], "=" ) ; defer delete( splt )
+        if string_starts_with( line, "fold along" ) {
+            splt := strings.split( line[len("fold along")+1:], "=" ) ; defer delete( splt )
             fold: Fold
             fold.side = .X if splt[0] == "x" else .Y
             fold.coord = strconv.atoi( splt[1] )
