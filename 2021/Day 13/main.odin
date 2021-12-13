@@ -34,7 +34,7 @@ Fold :: struct {
     coord: int,
 }
 
-part1 :: proc() {
+part1_and_2 :: proc() {
     fmt.println("==== Part 1 Begin ====")
     lines := strings.split(input, "\r\n")
 
@@ -58,7 +58,7 @@ part1 :: proc() {
         }
     }
 
-    for fold in folds {
+    for fold, i in &folds {
         using fold
         switch side {
             case .X:
@@ -76,19 +76,15 @@ part1 :: proc() {
                     }
                 }
         }
+        if i == 0 {
+            // dedup
+            mSet : map [Dot] bool ; defer delete( mSet )
+            for dot in &dots {
+                mSet[dot] = true
+            }
+            fmt.println( len( mSet ) )
+        }
     }
-
-    // dedup
-    mSet : map [Dot] bool
-    for dot in &dots {
-        mSet[dot] = true
-    }
-    count := 0
-    for dot, _ in mSet {
-        count += 1
-        fmt.println( dot )
-    }
-    fmt.println(count)
 
     print_grid :: proc( dots: []Dot ) {
         max : [2]int
@@ -108,19 +104,9 @@ part1 :: proc() {
     }
     print_grid( dots[:] )
 
-    fmt.println(len(mSet))
-
     fmt.println("==== Part 1 End ====")
 }
 
-part2 :: proc() {
-    fmt.println("==== Part 2 Begin ====")
-    lines := strings.split(input, "\n")
-
-    fmt.println("==== Part 2 End ====")
-}
-
 main :: proc() {
-    part1()
-    // part2()
+    part1_and_2()
 }
