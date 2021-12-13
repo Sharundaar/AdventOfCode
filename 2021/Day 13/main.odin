@@ -10,24 +10,6 @@ import "core:mem"
 
 input :: string(#load( "input.txt" ))
 
-contains_slice :: proc( container, containee: $T/[]$E ) -> bool where intrinsics.type_is_comparable(E) {
-	n := len( containee )
-	if n > len( container ) {
-		return false
-	}
-	for i in 0..<n {
-		if !find( container, containee[i] ) {
-			return false
-		}
-	}
-	return true
-}
-
-find :: proc{
-    slice.contains,
-    contains_slice,
-}
-
 Dot :: distinct [2]int
 FoldSide :: enum { X, Y }
 Fold :: struct {
@@ -103,7 +85,7 @@ part1_and_2 :: proc() {
         init_builder( &b, 0, 2048 ) ; defer destroy_builder( &b )
         for y := 0; y<=max.y; y += 1 {
             for x := 0; x <= max.x; x += 1 {
-                found := find( dots, Dot{ x, y } )
+                found := slice.contains( dots, Dot{ x, y } )
                 if found do write_rune_builder( &b, '#' )
                 else do     write_rune_builder( &b, '.' )
             }
@@ -116,7 +98,7 @@ part1_and_2 :: proc() {
     fmt.println("==== Part 1-2 End ====")
 }
 
-TRACKING_MEM :: true
+TRACKING_MEM :: false
 main :: proc() {
     when TRACKING_MEM {
         track : mem.Tracking_Allocator
