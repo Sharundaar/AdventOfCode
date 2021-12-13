@@ -6,6 +6,7 @@ import "core:strconv"
 import "core:math"
 import "core:os"
 import "core:intrinsics"
+import "core:mem"
 
 input :: string(#load( "input.txt" ))
 
@@ -36,10 +37,10 @@ Fold :: struct {
 
 part1_and_2 :: proc() {
     fmt.println("==== Part 1 Begin ====")
-    lines := strings.split(input, "\r\n")
+    lines := strings.split(input, "\r\n") ; defer delete( lines )
 
-    dots : [dynamic]Dot
-    folds : [dynamic]Fold
+    dots : [dynamic]Dot ; defer delete( dots )
+    folds : [dynamic]Fold ; defer delete( folds )
     fold_along := "fold along"
     for line in &lines {
         if line == "" do continue
@@ -93,20 +94,44 @@ part1_and_2 :: proc() {
             if dot.y > max.y do max.y = dot.y
         }
 
+        using strings
+        b: Builder
+        init_builder( &b, 0, 2048 ) ; defer destroy_builder( &b )
         for y := 0; y<=max.y; y += 1 {
             for x := 0; x <= max.x; x += 1 {
                 found := find( dots, Dot{ x, y } )
-                if found do fmt.printf( "#" )
-                else do  fmt.printf( "." )
+                if found do write_rune_builder( &b, '#' )
+                else do     write_rune_builder( &b, '.' )
             }
-            fmt.println()
+            write_rune_builder( &b, '\n' )
         }
+        fmt.println( to_string( b ) )
     }
     print_grid( dots[:] )
 
-    fmt.println("==== Part 1 End ====")
+    fmt.println("==== Part 1-2 End ====")
 }
 
+TRACKING_MEM :: true
 main :: proc() {
+    when TRACKING_MEM {
+        track : mem.Tracking_Allocator
+        mem.tracking_allocator_init(&track, context.allocator)
+        defer mem.tracking_allocator_destroy(&track)
+        context.allocator = mem.tracking_allocator(&track)
+    }
+
     part1_and_2()
+
+    when TRACKING_MEM {
+        if len(track.allocation_map) > 0 {
+            fmt.println()
+            total : int
+            for _, v in track.allocation_map {
+                total += v.size
+                fmt.printf("%v - leaked %v bytes\n", v.location, v.size)
+            }
+            fmt.println( "leaked", total, "bytes" )
+        }
+    }
 }
