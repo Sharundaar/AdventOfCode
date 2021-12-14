@@ -29,14 +29,14 @@ find :: proc{
 
 part1 :: proc() {
     fmt.println("==== Part 1 Begin ====")
-    lines := strings.split(input, "\n")
+    lines := strings.split(input, "\r\n")
 
     fmt.println("==== Part 1 End ====")
 }
 
 part2 :: proc() {
     fmt.println("==== Part 2 Begin ====")
-    lines := strings.split(input, "\n")
+    lines := strings.split(input, "\r\n")
 
     fmt.println("==== Part 2 End ====")
 }
