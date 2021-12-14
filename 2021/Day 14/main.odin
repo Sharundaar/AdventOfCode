@@ -6,26 +6,9 @@ import "core:strconv"
 import "core:math"
 import "core:os"
 import "core:intrinsics"
+import "core:mem"
 
 input :: string(#load( "input.txt" ))
-
-contains_slice :: proc( container, containee: $T/[]$E ) -> bool where intrinsics.type_is_comparable(E) {
-	n := len( containee )
-	if n > len( container ) {
-		return false
-	}
-	for i in 0..<n {
-		if !find( container, containee[i] ) {
-			return false
-		}
-	}
-	return true
-}
-
-find :: proc{
-    slice.contains,
-    contains_slice,
-}
 
 Rule :: struct {
     input : [2]u8,
@@ -105,28 +88,36 @@ part2 :: proc() {
     fmt.println("==== Part 2 Begin ====")
     lines := strings.split(input, "\r\n")
 
+    formula_input := lines[0]
+    rules_input := lines[2:]
+
     // init
-    pairs : map [[2]u8] int
-    rules : [dynamic]Rule
-    elem_count_map : map [u8] int
-    for line in lines[2:] {
-        splt := strings.split( line, " -> " )
+    pairs : map [[2]u8] int ; delete( pairs )
+    rules : [dynamic]Rule ; delete( rules )
+    elem_count_map : map [u8] int ; delete( elem_count_map )
+    for line in rules_input {
+        splt := strings.split( line, " -> " ) ; defer delete( splt )
         rule : Rule
         rule.input[0] = splt[0][0] ; rule.input[1] = splt[0][1]
         rule.output = splt[1][0]
+
+        // init individual character counts
         elem_count_map[rule.input[0]] = 0
         elem_count_map[rule.input[1]] = 0
         elem_count_map[rule.output] = 0
+
+        // init pair count
         pairs[rule.input] = 0
         append( &rules, rule )
     }
 
-    for _, i in lines[0:len(lines[0])-1] {
-        pair := [2]u8 { lines[0][i], lines[0][i+1] }
-        elem_count_map[pair[0]] += 1
-        pairs[pair] += 1
+    for _, i in formula_input {
+        elem_count_map[formula_input[i]] += 1
+        if i < len(formula_input) - 1 {
+            pair := [2]u8 { formula_input[i], formula_input[i+1] }
+            pairs[pair] += 1
+        }
     }
-    elem_count_map[lines[0][len(lines[0])-1]] += 1
 
     next_pairs : map[[2]u8]int
     for step in 0..<40 {
@@ -148,15 +139,6 @@ part2 :: proc() {
         }
     }
 
-    when false {
-        for k, v in pairs {
-            if k[0] not_in elem_count_map do elem_count_map[k[0]] = 0
-            elem_count_map[k[0]] += v
-            if k[1] not_in elem_count_map do elem_count_map[k[1]] = 0
-            elem_count_map[k[1]] += v
-        }
-    }
-
     least_common_count, least_common := max(int), u8(0)
     most_common_count, most_common := 0, u8(0)
     for k, v in elem_count_map {
@@ -174,7 +156,28 @@ part2 :: proc() {
     fmt.println("==== Part 2 End ====")
 }
 
+TRACKING_MEM :: false
+
 main :: proc() {
+    when TRACKING_MEM {
+        track : mem.Tracking_Allocator
+        mem.tracking_allocator_init(&track, context.allocator)
+        defer mem.tracking_allocator_destroy(&track)
+        context.allocator = mem.tracking_allocator(&track)
+    }
+
     part1()
     part2()
+
+    when TRACKING_MEM {
+        if len(track.allocation_map) > 0 {
+            fmt.println()
+            total : int
+            for _, v in track.allocation_map {
+                total += v.size
+                fmt.printf("%v - leaked %v bytes\n", v.location, v.size)
+            }
+            fmt.println( "leaked", total, "bytes" )
+        }
+    }
 }
