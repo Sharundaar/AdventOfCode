@@ -6,6 +6,8 @@ import "core:strconv"
 import "core:math"
 import "core:os"
 import "core:intrinsics"
+import stb_image "vendor:stb/image"
+import c "core:c/libc"
 
 input :: string(#load( "input.txt" ))
 vec2 :: distinct [2]int
@@ -109,6 +111,27 @@ part1 :: proc() {
     fmt.println( total_risk )
 
     fmt.println("==== Part 1 End ====")
+}
+
+write_risk_levels_with_path :: proc( risks: [][]int, path: []vec2 ) {
+    filename := strings.clone_to_cstring( "thing.bmp" )
+    w, h, comp : c.int = c.int(len(risks[0])), c.int(len(risks)), 3
+    data := make( []u8, int(h) * int(w) * int(comp) )
+    for y in 0..<int(h) do for x in 0..<int(w) {
+        color := u8(f32(risks[y][x] - 1) / 8 * 255.0)
+        data[ y * int(w) * int(comp) + x * int(comp) + 0 ] = color
+        data[ y * int(w) * int(comp) + x * int(comp) + 1 ] = color
+        data[ y * int(w) * int(comp) + x * int(comp) + 2 ] = color
+    }
+
+    for p in path {
+        i := p.y * int(w) * int(comp) + p.x * int(comp)
+        data[i + 0] = 255
+        data[i + 1] = 0
+        data[i + 2] = 0
+    }
+
+    stb_image.write_bmp( filename, w, h, comp, raw_data(data))
 }
 
 part2 :: proc() {
@@ -223,6 +246,7 @@ part2 :: proc() {
         total_risk += risk_levels[p.y][p.x]
     }
     fmt.println( total_risk )
+    write_risk_levels_with_path( risk_levels, total_path[:] )
     fmt.println("==== Part 2 End ====")
 }
 
