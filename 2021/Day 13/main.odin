@@ -7,6 +7,8 @@ import "core:math"
 import "core:os"
 import "core:intrinsics"
 import "core:mem"
+import stb_image "vendor:stb/image"
+import c "core:c/libc"
 
 input :: string(#load( "input.txt" ))
 
@@ -20,6 +22,34 @@ Fold :: struct {
 string_starts_with :: proc( s: string, starts_with: string ) -> bool {
     l_starts_with := len( starts_with )
     return len( s ) >= l_starts_with && s[0:l_starts_with] == starts_with
+}
+
+write_paper_grid :: proc( dots: []Dot ) {
+    max : [2]int
+    for dot in dots {
+        if dot.x > max.x do max.x = dot.x
+        if dot.y > max.y do max.y = dot.y
+    }
+
+    filename := strings.clone_to_cstring( "thing.png" )
+    w, h, comp : c.int = c.int((max.x+1)*2), c.int((max.y+1)*2), 3
+    data := make( []u8, int(h) * int(w) * int(comp) )
+
+    for d in dots {
+        i := d.y * 2 * int(w) * int(comp) + d.x * 2 * int(comp)
+        i1 := i
+        i2 := i + int( comp )
+        i3 := i + int( w ) * int( comp )
+        i4 := i2 + i3 - i1
+        is := []int { i1, i2, i3, i4 }
+        for k in is {
+            data[k + 0] = 255
+            data[k + 1] = 255
+            data[k + 2] = 255
+        }
+    }
+
+    stb_image.write_png( filename, w, h, comp, raw_data(data), 0 )
 }
 
 part1_and_2 :: proc() {
@@ -94,6 +124,7 @@ part1_and_2 :: proc() {
         fmt.println( to_string( b ) )
     }
     print_grid( dots[:] )
+    write_paper_grid( dots[:] )
 
     fmt.println("==== Part 1-2 End ====")
 }
