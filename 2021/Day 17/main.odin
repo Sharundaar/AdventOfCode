@@ -46,14 +46,11 @@ part1_and_2 :: proc() {
         p := vec2{}
         v0 := vec2{ x, y }
         v := v0
-        s := 0
         inside := false
         highest_y := 0
         for {
-            s += 1
             p += v
-            v.y -= 1
-            v.x -= 1
+            v -= vec2{ 1, 1 }
             v.x = max( v.x, 0 )
             if p.y > highest_y do highest_y = p.y
             if in_area( p, TargetArea ) {
