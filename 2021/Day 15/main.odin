@@ -114,7 +114,7 @@ part1 :: proc() {
 }
 
 write_risk_levels_with_path :: proc( risks: [][]int, path: []vec2 ) {
-    filename := strings.clone_to_cstring( "thing.bmp" )
+    filename := strings.clone_to_cstring( "thing.png" )
     w, h, comp : c.int = c.int(len(risks[0])), c.int(len(risks)), 3
     data := make( []u8, int(h) * int(w) * int(comp) )
     for y in 0..<int(h) do for x in 0..<int(w) {
@@ -131,7 +131,7 @@ write_risk_levels_with_path :: proc( risks: [][]int, path: []vec2 ) {
         data[i + 2] = 0
     }
 
-    stb_image.write_bmp( filename, w, h, comp, raw_data(data))
+    stb_image.write_png( filename, w, h, comp, raw_data(data), 0)
 }
 
 part2 :: proc() {
