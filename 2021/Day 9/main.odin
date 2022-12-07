@@ -6,6 +6,8 @@ import "core:strconv"
 import "core:math"
 import "core:os"
 import "core:intrinsics"
+import stb_image "vendor:stb/image"
+import c "core:c/libc"
 
 input :: string(#load( "input.txt" ))
 
@@ -92,6 +94,19 @@ flow_upward :: proc( heightmap: []u8, width, height: u8, coord: Coordinate, colo
     return count
 }
 
+write_heightmap :: proc( heightmap: []u8, width, height: int ) {
+    filename := strings.clone_to_cstring( "thing.png" )
+    w, h, comp : c.int = c.int(width), c.int(height), 3
+    data := make( []u8, int(h) * int(w) * int(comp) )
+    for y in 0..<int(h) do for x in 0..<int(w) {
+        color := u8(f32(heightmap[y * width + x]) / 9 * 255.0)
+        data[ y * int(w) * int(comp) + x * int(comp) + 0 ] = color
+        data[ y * int(w) * int(comp) + x * int(comp) + 1 ] = color
+        data[ y * int(w) * int(comp) + x * int(comp) + 2 ] = color
+    }
+    stb_image.write_png( filename, w, h, comp, raw_data(data), 0)
+}
+
 part2 :: proc() {
     fmt.println("==== Part 2 Begin ====")
     lines := strings.split(input, "\n")
@@ -133,6 +148,7 @@ part2 :: proc() {
     slice.sort( bassins[:] )
     last := len( bassins )
     fmt.println( bassins[last - 1] * bassins[last - 2] * bassins[last - 3] )
+    write_heightmap( heightmap[:], int(width), int(height) )
     fmt.println("==== Part 2 End ====")
 }
 
